@@ -180,6 +180,7 @@
     <Compile Include="FrmReporte.Designer.cs">
       <DependentUpon>FrmReporte.cs</DependentUpon>
     </Compile>
+    <Compile Include="GraphMailService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -232,6 +233,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GraphSecret.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Maxi.png" />

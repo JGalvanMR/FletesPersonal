@@ -25,10 +25,10 @@ namespace FletesPersonal
         SqlDataAdapter da;
         DataSet ds;
         SqlCommand cmd;
-        string query = "", OpFle = "", Query2 = "",XCombo = "N";
-        string UsuMail = "mprima@mrlucky.com.mx", PwdMail = "F7udjVm1928M$123";
+        string query = "", OpFle = "", Query2 = "", XCombo = "N";
+        string UsuMail = "mprima@mrlucky.com.mx", BuzonGraph = "embarques@mrlucky.com.mx";
         DateTime FechaIni;
-        Int32 FolioFle=0;
+        Int32 FolioFle = 0;
 
         public FrmFlete()
         {
@@ -66,13 +66,13 @@ namespace FletesPersonal
 
         private void CamposFlete(Boolean Tipo)
         {
-            DtFec.Enabled  = Tipo;
+            DtFec.Enabled = Tipo;
             DtHr.Enabled = Tipo;
-            CmbProv.Enabled  = Tipo;
-            CmbRuta.Enabled  = Tipo;
-            CmbArea.Enabled  = Tipo;
-            CmbTurno.Enabled  = Tipo;
-            CmbTipoFle.Enabled  = Tipo;
+            CmbProv.Enabled = Tipo;
+            CmbRuta.Enabled = Tipo;
+            CmbArea.Enabled = Tipo;
+            CmbTurno.Enabled = Tipo;
+            CmbTipoFle.Enabled = Tipo;
             CmbTipoViaje.Enabled = Tipo;
             TxtCant.Enabled = Tipo;
             CmbProv.SelectedIndex = -1;
@@ -87,7 +87,7 @@ namespace FletesPersonal
             TxtCant.Text = "";
             BtnAlta.Enabled = (Tipo) ? false : true;
             TxtElabora.Enabled = Tipo;
-            
+
         }
 
         private void BtnAlta_Click(object sender, EventArgs e)
@@ -108,7 +108,7 @@ namespace FletesPersonal
             ds = new DataSet();
             da.Fill(ds, "FlePen");
             FlePen = ds.Tables["FlePen"];
-            
+
             thisConnection.Close();
             TxtNoFle.Text = Folio;
             CamposFlete(true);
@@ -237,7 +237,7 @@ namespace FletesPersonal
                     TxtElabora.Focus();
                     return;
                 }
-                //SendMail(UsuMail.Trim(), UsuMail.Trim().Substring(0, UsuMail.Trim().IndexOf("@")), PwdMail.Trim(), "ricardo.cortes@mrlucky.com.mx", 1); //;
+                //SendMail(UsuMail.Trim(), "ricardo.cortes@mrlucky.com.mx");
                 //return;
                 thisConnection.Open();
                 if (OpFle == "A")
@@ -263,7 +263,7 @@ namespace FletesPersonal
                             "FlePer_Semana = '" + TraeSemana(DtFec.Value.ToString("dd/MM/yyyy")).ToString() + "' Where IdFletePer = '" + TxtNoFle.Text + "'";
                     cmd = new SqlCommand(query, thisConnection);
                     cmd.ExecuteNonQuery();
-                    FolioFle = Convert.ToInt32(TxtNoFle.Text); 
+                    FolioFle = Convert.ToInt32(TxtNoFle.Text);
                 }
                 query = "Select Email_dest from tb_mstr_email where cnte_clave = 'FLEPER' AND EMAIL_MOV = 'FLE'";
                 cmd = new SqlCommand(query, thisConnection);
@@ -271,8 +271,8 @@ namespace FletesPersonal
                 thisConnection.Close();
                 foreach (DataRow row in Prov.Select("Prov_Clave = '" + CmbProv.SelectedValue.ToString() + "'"))
                     Dest += ";" + row["prov_email"].ToString().Trim();
-                MessageBox.Show("El Flete "+ FolioFle.ToString() +" fue guardado con Exito!!!", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                SendMail(UsuMail.Trim(), UsuMail.Trim().Substring(0, UsuMail.Trim().IndexOf("@")), PwdMail.Trim(), Dest, 1); //;
+                MessageBox.Show("El Flete " + FolioFle.ToString() + " fue guardado con Exito!!!", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                SendMail(UsuMail.Trim(), Dest);
                 TxtCant.Text = "";
                 TxtNoFle.Text = "";
                 BtnCancel_Click(sender, e);
@@ -281,7 +281,7 @@ namespace FletesPersonal
             #region Guardar la Cancelacion del Flete en Consultas
             if (OpFle == "B")
             {
-                if (MessageBox.Show("Esta Seguro de Cancelar el No. de Flete "+ DgDatos.Rows[DgDatos.CurrentRow.Index].Cells["IdFletePer"].Value.ToString(), "Cancelación de Flete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                if (MessageBox.Show("Esta Seguro de Cancelar el No. de Flete " + DgDatos.Rows[DgDatos.CurrentRow.Index].Cells["IdFletePer"].Value.ToString(), "Cancelación de Flete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 {
                     DgDatos.CurrentRow.Selected = false;
                     LblFleSel.Text = "0";
@@ -295,7 +295,7 @@ namespace FletesPersonal
                 SqlCommand cmd = new SqlCommand(Cadena, thisConnection);
                 cmd.ExecuteNonQuery();
                 thisConnection.Close();
-                MessageBox.Show("El Flete "+ LblFleSel.Text +" Fue Cancelado con Exito!!", "Cancelar Flete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("El Flete " + LblFleSel.Text + " Fue Cancelado con Exito!!", "Cancelar Flete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DgDatos.CurrentRow.Selected = false;
                 LblFleSel.Text = "0";
                 LblFleSel.Visible = false;
@@ -311,14 +311,14 @@ namespace FletesPersonal
             BtnSave.Enabled = true; ;
             thisConnection.Open();
             if (OpFle == "A")
-              query = "SELECT count(IdDestFlete) AS Totaldeldia FROM Tb_FlePer_FletePersonal " +
-                    "WHERE FlePer_Fecha = '"+ DtFec.Value.ToShortDateString() +"' AND IdDestFlete = '" + CmbRuta.SelectedValue.ToString() + "' and FlePer_Status = 'A'";
+                query = "SELECT count(IdDestFlete) AS Totaldeldia FROM Tb_FlePer_FletePersonal " +
+                      "WHERE FlePer_Fecha = '" + DtFec.Value.ToShortDateString() + "' AND IdDestFlete = '" + CmbRuta.SelectedValue.ToString() + "' and FlePer_Status = 'A'";
             if (OpFle == "M")
                 query = "SELECT count(IdDestFlete) AS Totaldeldia FROM Tb_FlePer_FletePersonal " +
                     "WHERE FlePer_Fecha = '" + DtFec.Value.ToShortDateString() + "' AND IdDestFlete = '" + CmbRuta.SelectedValue.ToString() + "' and FlePer_Status = 'A' and FlePer_Captura IS NOT NULL";
             cmd = new SqlCommand(query, thisConnection);
             Int32 FleDia = Convert.ToInt32(cmd.ExecuteScalar());
-            query = "Select FleEsp_Motivo, FleEsp_Tipo from tb_FlePer_FleEspecial where FleEsp_Fecha = '" + DtFec.Value.ToShortDateString() + "' AND FleEsp_Ruta = '"+ CmbRuta.SelectedValue.ToString() + "' " +
+            query = "Select FleEsp_Motivo, FleEsp_Tipo from tb_FlePer_FleEspecial where FleEsp_Fecha = '" + DtFec.Value.ToShortDateString() + "' AND FleEsp_Ruta = '" + CmbRuta.SelectedValue.ToString() + "' " +
                     "and FleEsp_Registrado = 'N'";
             da = new SqlDataAdapter(query, thisConnection);
             ds = new DataSet();
@@ -339,7 +339,7 @@ namespace FletesPersonal
             CmbTipoFle.Enabled = true;
             LblMotivo.Visible = false;
             string Nom = "";
-            foreach (DataRow row in Rutas.Select("IdDestFlete = '"+ CmbRuta.SelectedValue.ToString()+"'"))
+            foreach (DataRow row in Rutas.Select("IdDestFlete = '" + CmbRuta.SelectedValue.ToString() + "'"))
             {
                 FleXdia = Convert.ToInt32(row["FleteCant"]);
                 LblCosto.Text = row["FleteCosto"].ToString();
@@ -355,7 +355,7 @@ namespace FletesPersonal
             }
             if (FleDia >= FleXdia)
             {
-                MessageBox.Show("Ya se Llego al Tope de Fletes x dia que son de " + FleXdia + System.Environment.NewLine  + "  " + Nom  +" Ya no se pueden hacer mas Fletes para este destino Verifique la Informacion", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Ya se Llego al Tope de Fletes x dia que son de " + FleXdia + System.Environment.NewLine + "  " + Nom + " Ya no se pueden hacer mas Fletes para este destino Verifique la Informacion", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 BtnSave.Enabled = false;
             }
             string HayFletePen = "N";
@@ -380,8 +380,8 @@ namespace FletesPersonal
             }
             else
                 if (FleDia >= FleXdia || HayFletePen == "S")
-                    BtnCancel_Click(sender, e);
-            }
+                BtnCancel_Click(sender, e);
+        }
 
         private void IcnBtnRefresh_Click(object sender, EventArgs e)
         {
@@ -395,7 +395,7 @@ namespace FletesPersonal
                     "A.FlePer_Turno, A.FlePer_TipoFlete, A.FlePer_TipoViaje, A.FlePer_Cantidad, A.FlePer_Status " +
                     "FROM Tb_FlePer_FletePersonal A, tb_cat_proveedor B, Tb_FlePer_Ruta C " +
                     "WHERE A.Prov_Clave = B.prov_clave AND A.IdDestFlete = C.IdDestFlete AND " +
-                    "A.FlePer_Fecha BETWEEN '"+ DtFecIni.Value.ToShortDateString() +"' AND '"+ DtFecFin.Value.ToShortDateString() +"' ORDER BY A.IdFletePer ";
+                    "A.FlePer_Fecha BETWEEN '" + DtFecIni.Value.ToShortDateString() + "' AND '" + DtFecFin.Value.ToShortDateString() + "' ORDER BY A.IdFletePer ";
             Query2 = query;
             da = new SqlDataAdapter(query, thisConnection);
             ds = new DataSet();
@@ -448,12 +448,12 @@ namespace FletesPersonal
             DgDatos.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             DgDatos.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             DgDatos.Columns[9].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            DgDatos.Columns[10].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter ;
+            DgDatos.Columns[10].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
         private void TxtFle_KeyPress(object sender, KeyPressEventArgs e)
         {
-            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar); 
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
         }
 
         private void IcnBtnFle_Click(object sender, EventArgs e)
@@ -467,7 +467,7 @@ namespace FletesPersonal
             query = "SELECT A.IdFletePer, A.FlePer_Fecha, A.FlePer_Hora, B.prov_nombre, C.NomDestFlete, A.FlePer_Area, " +
                     "A.FlePer_Turno, A.FlePer_TipoFlete, A.FlePer_TipoViaje, A.FlePer_Cantidad, A.FlePer_Status " +
                     "FROM Tb_FlePer_FletePersonal A, tb_cat_proveedor B, Tb_FlePer_Ruta C " +
-                    "WHERE A.Prov_Clave = B.prov_clave AND A.IdDestFlete = C.IdDestFlete AND A.IdFletePer = '"+ TxtFle.Text  +"' ORDER BY A.IdFletePer ";
+                    "WHERE A.Prov_Clave = B.prov_clave AND A.IdDestFlete = C.IdDestFlete AND A.IdFletePer = '" + TxtFle.Text + "' ORDER BY A.IdFletePer ";
             Query2 = query;
             da = new SqlDataAdapter(query, thisConnection);
             ds = new DataSet();
@@ -535,16 +535,16 @@ namespace FletesPersonal
 
         private void CmbFle_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            foreach(DataRow row in FlePen.Select("IdFletePer = '"+ CmbFle.SelectedValue.ToString() +"'"))
+            foreach (DataRow row in FlePen.Select("IdFletePer = '" + CmbFle.SelectedValue.ToString() + "'"))
             {
-                
+
                 if (BtnAlta.Enabled == true)
                     return;
                 TxtNoFle.Text = CmbFle.SelectedValue.ToString();
                 DateTime FecFle = Convert.ToDateTime(row["FlePer_Fecha"]);
                 if (FecFle < DtFec.MinDate.Date)
                 {
-                    MessageBox.Show("La Fecha del Flete '"+ FecFle.ToShortDateString() +"'es menor a la Fecha Minima que es de " + DtFec.MinDate.ToShortDateString(), "Fecha Fuera de Rango", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show("La Fecha del Flete '" + FecFle.ToShortDateString() + "'es menor a la Fecha Minima que es de " + DtFec.MinDate.ToShortDateString(), "Fecha Fuera de Rango", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     BtnCancel_Click(sender, e);
                     return;
                 }
@@ -578,21 +578,21 @@ namespace FletesPersonal
                     if (Convert.ToInt32(Hr.Substring(0, 2)) > 13 && Convert.ToInt32(Hr.Substring(0, 2)) < 22)
                     CmbTurno.SelectedIndex = 1; // Vestpertino 
                 else
-                    CmbTurno.SelectedIndex = 2; 
-                
+                    CmbTurno.SelectedIndex = 2;
+
                 thisConnection.Open();
                 query = "Select(rtrim(b.emp_nombre) + ' ' + rtrim(b.emp_paterno) + ' ' + rtrim(b.emp_materno)) AS Nom, FlePer_Nombre as Nombre, FlePer_Fecha as Fecha, " +
                         "IdFletePer, FlePer_CveNomina, FlePer_Latitud, FlePer_Longitud,  FlePer_Depto, c.depto_clave, c.depto_nombre, C.DEPTO_AREA AS AREA " +
                         "From Tb_FlePer_DetFlete a " +
                         "LEFT JOIN tb_cat_empleados b ON a.FlePer_CveNomina = b.emp_clave " +
                         "LEFT JOIN Tb_Cat_Deptos c ON b.emp_depto = c.depto_clave " +
-                        "Where IdFletePer = '"+ CmbFle.SelectedValue.ToString() +"' Order by FlePer_Fecha ";
+                        "Where IdFletePer = '" + CmbFle.SelectedValue.ToString() + "' Order by FlePer_Fecha ";
                 da = new SqlDataAdapter(query, thisConnection);
                 ds = new DataSet();
                 da.Fill(ds, "Emple");
                 Emple = ds.Tables["Emple"];
                 Int32 TotEns = 0, TotFre = 0;
-                foreach(DataRow Row in Emple.Rows)
+                foreach (DataRow Row in Emple.Rows)
                 {
                     if (Convert.ToString(Row["Nombre"]).Trim().Length == 0)
                     {
@@ -618,18 +618,23 @@ namespace FletesPersonal
             }
         }
 
+        private void PnlFle_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
         private void BtnConsul_Click(object sender, EventArgs e)
         {
             //SendMailCtaAgui("enviaipo@aguilares.com.mx", "enviaipo@aguilares.com.mx", "-mZVoPT0&=g&", "ricardo.cortes@mrlucky.com.mx;jlenriquez@grupou.mx", 1);
             //return;
-            
+
             BtnAlta.Enabled = false;
             PnlFle.Visible = false;
             PnlCons.Visible = true;
             //BtnSave.Enabled = true;
             BtnCancel.Enabled = true;
             //BtnBaja.Visible = true;
-            PnlCons.Dock = DockStyle.Fill; 
+            PnlCons.Dock = DockStyle.Fill;
             OpFle = "C";
         }
 
@@ -639,7 +644,7 @@ namespace FletesPersonal
             //thisConnection.Open();
             query = "SELECT semana FROM tb_cat_semanas WHERE fecha1 <= '" + Fec + "' AND fecha2 >= '" + Fec + "'";
             cmd = new SqlCommand(query, thisConnection);
-            Sem = Convert.ToInt32(cmd.ExecuteScalar()); 
+            Sem = Convert.ToInt32(cmd.ExecuteScalar());
             //thisConnection.Close();
             return Sem;
         }
@@ -697,7 +702,7 @@ namespace FletesPersonal
                 smtp.Send(email);
                 email.Dispose();
                 //MessageBox.Show("correo enviado", "AVISO", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                Utilerias.Class1.registrar_movimiento3(DateTime.Now, Environment.MachineName, Utilerias.Class1.Usu_login.Trim(), "A", "2.19", FolioFle.ToString(), "Captura Flete de Personal Folio: "+FolioFle.ToString() , "SIPGAB", "", "" + InfoCorreo + "");
+                Utilerias.Class1.registrar_movimiento3(DateTime.Now, Environment.MachineName, Utilerias.Class1.Usu_login.Trim(), "A", "2.19", FolioFle.ToString(), "Captura Flete de Personal Folio: " + FolioFle.ToString(), "SIPGAB", "", "" + InfoCorreo + "");
 
             }
             catch (Exception ex)
@@ -706,31 +711,9 @@ namespace FletesPersonal
             }
         }
 
-        public void SendMail(string mail, string usuario, string password, string Dest, Int16 Opcion)
+        public void SendMail(string cc, string Dest)
         {
-            MailMessage msg = new MailMessage();
-            MailMessage email = new MailMessage();
-            string[] destinatarios = Dest.Split(';');
             string InfoCorreo = "";
-            foreach (string destinos in destinatarios)
-            {
-                email.To.Add(new MailAddress(destinos));
-                //email.Bcc.Add("andrea@mrlucky.com.mx");
-            }
-            email.CC.Add(mail);
-            //if (Opcion == 1) // Autorizados
-            //{
-            //    email.Bcc.Add("musabiaga@mrlucky.com.mx"); //  PARA MANDAR LA COPIA OCULTA 
-            //}
-            //email.To.Add(new MailAddress(mail));
-            //email.To.Add(new MailAddress("gcamacho@mrlucky.com.mx"));
-            //string correos = "ricardo.cortes@mrlucky.com.mx; jbravo@mrlucky.com.mx";
-
-            //cap = "";
-            //foreach (DataRow fila in captura.Rows)
-            //    cap = cap + Convert.ToString(fila["cantidad"].ToString()).Trim() + " - " + Convert.ToString(fila["producto"].ToString()).Trim() + " - " + Convert.ToString(fila["nombre"].ToString()).Trim() + " <br> ";
-
-            // se busca la Informacion del Inventario de Cajones x Proveedor
             string Cad = string.Format(
                             "<H3>Hola Buen día" + "</H3>" +
                             "<H3><p style='color: blue'>Envio Información Del Flete de Personal " + FolioFle.ToString() + " </p></H3>" +
@@ -747,32 +730,13 @@ namespace FletesPersonal
                             "www.mrlucky.com.mx" + "<br><br>" +
                             "" + TxtElabora.Text.Trim());
 
-            email.From = new MailAddress(mail); //
-            email.Subject = "Flete " + FolioFle.ToString() + " de FLETES DE PERSONAL";//mAsunto; //"Mensaje de Prueba";
-            email.Body = Cad;//mBody;  //"Información de la factura";
-            email.IsBodyHtml = true;
-            email.Priority = MailPriority.Normal;
             InfoCorreo = Cad.Replace("'", "");
-            //string archivo = @"C:\Reportes\factura_informativa.txt";
-            //if (Archivo.Trim().Length > 0)
-            //    if (File.Exists(Archivo))
-            //        email.Attachments.Add(new Attachment(Archivo));            
-            SmtpClient smtp = new SmtpClient();
-            smtp.Host = "mail1.mrlucky.com.mx";
-            smtp.Port = 587;
-            //smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new System.Net.NetworkCredential(usuario, password);
-            smtp.EnableSsl = true;
-            //smtp.Credentials = new NetworkCredential("ricardo.cortes", "rcedillo");
-            //smtp.Credentials = new NetworkCredential(usuario, password);
 
             try
             {
-                smtp.Send(email);
-                email.Dispose();
-                //MessageBox.Show("correo enviado", "AVISO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                new GraphMailService(BuzonGraph).Enviar(Dest.Split(';'), new[] { cc },
+                    "Flete " + FolioFle.ToString() + " de FLETES DE PERSONAL", Cad);
                 Utilerias.Class1.registrar_movimiento3(DateTime.Now, Environment.MachineName, Utilerias.Class1.Usu_login.Trim(), "A", "2.19", FolioFle.ToString(), "Captura Flete de Personal Folio: " + FolioFle.ToString(), "SIPGAB", "", "" + InfoCorreo + "");
-
             }
             catch (Exception ex)
             {

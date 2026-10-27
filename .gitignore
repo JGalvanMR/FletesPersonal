@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Secreto de Microsoft Graph embebido en el ejecutable
+GraphSecret.txt
