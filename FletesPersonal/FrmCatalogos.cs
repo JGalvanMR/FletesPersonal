@@ -153,10 +153,15 @@ namespace FletesPersonal
             TxtCosto.Visible = Tipo;
             TxtNom.Visible = Tipo;
             TxtViajes.Visible = Tipo;
+            LblCup.Visible = Tipo;
+            TxtCupo.Visible = Tipo;
+            LblVeh.Visible = Tipo;
+            TxtVehiculo.Visible = Tipo;
             BtnCancel.Enabled = Tipo;
             BtnSave.Enabled = Tipo;
             BtnBaja.Enabled = (Tipo) ? false : true;
             BtnAlta.Enabled = (Tipo) ? false : true;
+            BtnMod.Enabled = (Tipo) ? false : true;
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
@@ -166,10 +171,36 @@ namespace FletesPersonal
             TxtCosto.Enabled = true;
             TxtNom.Enabled = true;
             TxtViajes.Enabled = true;
+            TxtCupo.Enabled = true;
+            TxtVehiculo.Enabled = true;
             TxtNom.Text = "";
             TxtViajes.Text = "";
             TxtCosto.Text = "";
+            TxtCupo.Text = "";
+            TxtVehiculo.Text = "";
             IdRuta = 0;
+        }
+
+        private void BtnMod_Click(object sender, EventArgs e)
+        {
+            if (DgRutas.CurrentRow == null)
+                return;
+            DataGridViewRow fila = DgRutas.CurrentRow;
+            CamposRuta(true);
+            OpRuta = "M";
+            // Solo se pueden modificar el cupo y el vehículo
+            TxtNom.Enabled = false;
+            TxtViajes.Enabled = false;
+            TxtCosto.Enabled = false;
+            TxtCupo.Enabled = true;
+            TxtVehiculo.Enabled = true;
+            TxtNom.Text = Convert.ToString(fila.Cells["NomDestFlete"].Value);
+            TxtViajes.Text = Convert.ToString(fila.Cells["FleteCant"].Value);
+            TxtCosto.Text = Convert.ToString(fila.Cells["FleteCosto"].Value);
+            TxtCupo.Text = Convert.ToString(fila.Cells["RutaCupo"].Value);
+            TxtVehiculo.Text = Convert.ToString(fila.Cells["RutaVehiculo"].Value);
+            IdRuta = Convert.ToInt32(fila.Cells["IdDestFlete"].Value);
+            TxtCupo.Focus();
         }
 
         private void TxtViajes_KeyPress(object sender, KeyPressEventArgs e)
@@ -180,6 +211,9 @@ namespace FletesPersonal
         private void TxtCosto_KeyPress(object sender, KeyPressEventArgs e)
         {
             e.Handled = !char.IsDigit(e.KeyChar) && (e.KeyChar != '.') && !Char.IsControl(e.KeyChar);
+            // Solo un punto decimal
+            if (e.KeyChar == '.' && TxtCosto.Text.Contains("."))
+                e.Handled = true;
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
@@ -205,18 +239,84 @@ namespace FletesPersonal
                     TxtCosto.Focus();
                     return;
                 }
+                int viajes;
+                if (!int.TryParse(TxtViajes.Text.Trim(), out viajes) || viajes <= 0)
+                {
+                    MessageBox.Show("El Numero de Viajes x Dia debe ser un numero mayor a cero", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    TxtViajes.Focus();
+                    return;
+                }
+                decimal costo;
+                if (!decimal.TryParse(TxtCosto.Text.Trim(), System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out costo) || costo <= 0)
+                {
+                    MessageBox.Show("El Costo de la Ruta no es valido", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    TxtCosto.Focus();
+                    return;
+                }
+                int cupo;
+                if (!int.TryParse(TxtCupo.Text.Trim(), out cupo) || cupo <= 0)
+                {
+                    MessageBox.Show("No se ha Capturado el Cupo de la Ruta (numero de personas)", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    TxtCupo.Focus();
+                    return;
+                }
+                string nombre = TxtNom.Text.Trim();
                 thisConeccion.Open();
-                string Cadena = "Select Max(idDestFlete) from tb_FlePer_Ruta";
-                SqlCommand cmd = new SqlCommand(Cadena, thisConeccion);
-                Int32 Conse = Convert.ToInt32(cmd.ExecuteScalar());
-                Conse++;
-                Cadena = "Insert into tb_FlePer_Ruta(IdDestFlete, NomDestFlete, FleteCant, FleteCosto, DestStatus) " +
-                         "Values('" + Conse.ToString() + "','" + TxtNom.Text.Trim() + "','" + TxtViajes.Text.Trim() + "','" + TxtCosto.Text.Trim() + "','A')";
-                cmd = new SqlCommand(Cadena, thisConeccion);
-                cmd.ExecuteNonQuery();
+                SqlTransaction tran = thisConeccion.BeginTransaction(IsolationLevel.Serializable);
+                try
+                {
+                    SqlCommand cmd = new SqlCommand("Select count(*) from tb_FlePer_Ruta where LTRIM(RTRIM(NomDestFlete)) = @nom", thisConeccion, tran);
+                    cmd.Parameters.AddWithValue("@nom", nombre);
+                    if (Convert.ToInt32(cmd.ExecuteScalar()) > 0)
+                    {
+                        tran.Rollback();
+                        thisConeccion.Close();
+                        MessageBox.Show("Ya existe una ruta con el nombre '" + nombre + "'", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        TxtNom.Focus();
+                        return;
+                    }
+                    // El consecutivo se calcula dentro de la misma transaccion para evitar duplicados
+                    cmd = new SqlCommand("Insert into tb_FlePer_Ruta(IdDestFlete, NomDestFlete, FleteCant, FleteCosto, DestStatus, RutaCupo, RutaVehiculo) " +
+                                         "Select ISNULL(Max(IdDestFlete), 0) + 1, @nom, @via, @cos, 'A', @cupo, @veh from tb_FlePer_Ruta", thisConeccion, tran);
+                    cmd.Parameters.AddWithValue("@nom", nombre);
+                    cmd.Parameters.AddWithValue("@via", viajes.ToString());
+                    cmd.Parameters.AddWithValue("@cos", costo.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    cmd.Parameters.AddWithValue("@cupo", cupo.ToString());
+                    cmd.Parameters.AddWithValue("@veh", (TxtVehiculo.Text.Trim().Length == 0) ? (object)DBNull.Value : TxtVehiculo.Text.Trim());
+                    cmd.ExecuteNonQuery();
+                    tran.Commit();
+                }
+                catch
+                {
+                    tran.Rollback();
+                    thisConeccion.Close();
+                    throw;
+                }
                 thisConeccion.Close();
                 MessageBox.Show("Ruta Agregada Correctamente!!!", "Alta de Rutas", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CamposRuta(false);
+                BtnCancel_Click(sender, e);
+                CargaRutas();
+            }
+            #endregion
+            #region ModificaRutas
+            if (OpRuta == "M")
+            {
+                int cupoM;
+                if (!int.TryParse(TxtCupo.Text.Trim(), out cupoM) || cupoM <= 0)
+                {
+                    MessageBox.Show("No se ha Capturado el Cupo de la Ruta (numero de personas)", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    TxtCupo.Focus();
+                    return;
+                }
+                thisConeccion.Open();
+                SqlCommand cmdM = new SqlCommand("Update tb_FlePer_Ruta set RutaCupo = @cupo, RutaVehiculo = @veh where IdDestFlete = @id", thisConeccion);
+                cmdM.Parameters.AddWithValue("@cupo", cupoM.ToString());
+                cmdM.Parameters.AddWithValue("@veh", (TxtVehiculo.Text.Trim().Length == 0) ? (object)DBNull.Value : TxtVehiculo.Text.Trim());
+                cmdM.Parameters.AddWithValue("@id", IdRuta.ToString());
+                cmdM.ExecuteNonQuery();
+                thisConeccion.Close();
+                MessageBox.Show("Ruta Modificada Correctamente!!!", "Modificar Ruta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                BtnCancel_Click(sender, e);
                 CargaRutas();
             }
             #endregion
@@ -259,11 +359,15 @@ namespace FletesPersonal
                 TxtCosto.Enabled = false;
                 TxtNom.Enabled = false;
                 TxtViajes.Enabled = false;
+                TxtCupo.Enabled = false;
+                TxtVehiculo.Enabled = false;
                 TxtNom.Text = DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["NomDestFlete"].Value.ToString();
                 TxtViajes.Text = DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["FleteCant"].Value.ToString();
                 TxtCosto.Text = DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["FleteCosto"].Value.ToString();
+                TxtCupo.Text = Convert.ToString(DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["RutaCupo"].Value);
+                TxtVehiculo.Text = Convert.ToString(DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["RutaVehiculo"].Value);
                 IdRuta = Convert.ToInt32(DgRutas.Rows[DgRutas.CurrentRow.Index].Cells["IdDestFlete"].Value);
-                OpRP = "B";
+                OpRuta = "B";
             }
         }
 
@@ -314,7 +418,7 @@ namespace FletesPersonal
         private void BtnCancelRP_Click(object sender, EventArgs e)
         {
             CamposRutaProv(false);
-            OpRuta = "";
+            OpRP = "";
             TxtCosPro.Enabled = true;
             CmbProv.Enabled = true;
             CmbRuta.Enabled = true;

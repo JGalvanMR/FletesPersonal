@@ -127,7 +127,7 @@ namespace FletesPersonal
             query = "SELECT CAST(FlePer_Fecha AS DATE) as FlePer_Fecha, COUNT(IdFletePer) AS total FROM Tb_FlePer_FletePersonal " +
                     "WHERE FlePer_Fecha BETWEEN '" + FI + "' AND '" + FF + "' and FlePer_Status = 'A' " +
                     "GROUP BY CAST(FlePer_Fecha AS DATE)";
-            query = "SELECT sum(FleteCant)   FROM Tb_FlePer_Ruta ";
+            query = "SELECT ISNULL(sum(FleteCant), 0)   FROM Tb_FlePer_Ruta WHERE ISNULL(DestStatus, 'A') <> 'B' ";
             cmd = new SqlCommand(query, ThisConnection);
             Int32 ViaxDia = Convert.ToInt32(cmd.ExecuteScalar());
             LblXdia.Text = ViaxDia.ToString();
@@ -232,10 +232,13 @@ namespace FletesPersonal
 
             foreach (DataRow row in Fletes.Rows)
             {
-                foreach (DataRow Row in Rutas.Select("NomDestFlete = '" + row["Ruta"].ToString() + "'"))
+                foreach (DataRow Row in Rutas.Select("NomDestFlete = '" + row["Ruta"].ToString().Replace("'", "''") + "'"))
                 {
-                    row["Tope"] = (Convert.ToInt32(Row["FleteCant"].ToString()) * dias).ToString();
-                    row["Cupo"] = Convert.ToDecimal(Row["RutaCupo"].ToString()); // Convert.ToDecimal(LblProm.Text)).ToString();
+                    // FleteCant / RutaCupo pueden venir NULL (rutas nuevas sin cupo): se toman como 0
+                    int fleteCant = (Row["FleteCant"] == DBNull.Value) ? 0 : Convert.ToInt32(Row["FleteCant"]);
+                    decimal rutaCupo = (Row["RutaCupo"] == DBNull.Value) ? 0m : Convert.ToDecimal(Row["RutaCupo"]);
+                    row["Tope"] = (fleteCant * dias).ToString();
+                    row["Cupo"] = rutaCupo;
                 }
             }
 

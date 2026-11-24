@@ -43,6 +43,11 @@
             this.LblVia = new System.Windows.Forms.Label();
             this.TxtNom = new System.Windows.Forms.TextBox();
             this.LblNom = new System.Windows.Forms.Label();
+            this.LblCup = new System.Windows.Forms.Label();
+            this.TxtCupo = new System.Windows.Forms.TextBox();
+            this.LblVeh = new System.Windows.Forms.Label();
+            this.TxtVehiculo = new System.Windows.Forms.TextBox();
+            this.BtnMod = new FontAwesome.Sharp.IconButton();
             this.BtnBaja = new FontAwesome.Sharp.IconButton();
             this.BtnAlta = new FontAwesome.Sharp.IconButton();
             this.BtnSave = new FontAwesome.Sharp.IconButton();
@@ -183,6 +188,11 @@
             // PagRutas
             // 
             this.PagRutas.BackColor = System.Drawing.Color.Transparent;
+            this.PagRutas.Controls.Add(this.BtnMod);
+            this.PagRutas.Controls.Add(this.TxtVehiculo);
+            this.PagRutas.Controls.Add(this.LblVeh);
+            this.PagRutas.Controls.Add(this.TxtCupo);
+            this.PagRutas.Controls.Add(this.LblCup);
             this.PagRutas.Controls.Add(this.BtnCancel);
             this.PagRutas.Controls.Add(this.TxtCosto);
             this.PagRutas.Controls.Add(this.LblCos);
@@ -284,6 +294,67 @@
             this.LblNom.TabIndex = 14;
             this.LblNom.Text = "Nombre:";
             this.LblNom.Visible = false;
+            // 
+            // LblCup
+            // 
+            this.LblCup.AutoSize = true;
+            this.LblCup.Location = new System.Drawing.Point(711, 322);
+            this.LblCup.Name = "LblCup";
+            this.LblCup.Size = new System.Drawing.Size(47, 17);
+            this.LblCup.TabIndex = 21;
+            this.LblCup.Text = "Cupo:";
+            this.LblCup.Visible = false;
+            // 
+            // TxtCupo
+            // 
+            this.TxtCupo.Location = new System.Drawing.Point(779, 316);
+            this.TxtCupo.MaxLength = 5;
+            this.TxtCupo.Name = "TxtCupo";
+            this.TxtCupo.Size = new System.Drawing.Size(309, 23);
+            this.TxtCupo.TabIndex = 22;
+            this.TxtCupo.Visible = false;
+            this.TxtCupo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TxtViajes_KeyPress);
+            // 
+            // LblVeh
+            // 
+            this.LblVeh.AutoSize = true;
+            this.LblVeh.Location = new System.Drawing.Point(711, 378);
+            this.LblVeh.Name = "LblVeh";
+            this.LblVeh.Size = new System.Drawing.Size(71, 17);
+            this.LblVeh.TabIndex = 23;
+            this.LblVeh.Text = "Vehículo:";
+            this.LblVeh.Visible = false;
+            // 
+            // TxtVehiculo
+            // 
+            this.TxtVehiculo.Location = new System.Drawing.Point(788, 372);
+            this.TxtVehiculo.MaxLength = 40;
+            this.TxtVehiculo.Name = "TxtVehiculo";
+            this.TxtVehiculo.Size = new System.Drawing.Size(300, 23);
+            this.TxtVehiculo.TabIndex = 24;
+            this.TxtVehiculo.Visible = false;
+            // 
+            // BtnMod
+            // 
+            this.BtnMod.BackColor = System.Drawing.Color.Transparent;
+            this.BtnMod.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnMod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.BtnMod.Flip = FontAwesome.Sharp.FlipOrientation.Normal;
+            this.BtnMod.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnMod.ForeColor = System.Drawing.Color.Blue;
+            this.BtnMod.IconChar = FontAwesome.Sharp.IconChar.Edit;
+            this.BtnMod.IconColor = System.Drawing.Color.Blue;
+            this.BtnMod.IconSize = 30;
+            this.BtnMod.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.BtnMod.Location = new System.Drawing.Point(703, 90);
+            this.BtnMod.Name = "BtnMod";
+            this.BtnMod.Rotation = 0D;
+            this.BtnMod.Size = new System.Drawing.Size(101, 34);
+            this.BtnMod.TabIndex = 25;
+            this.BtnMod.Text = "Modificar";
+            this.BtnMod.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.BtnMod.UseVisualStyleBackColor = false;
+            this.BtnMod.Click += new System.EventHandler(this.BtnMod_Click);
             // 
             // BtnBaja
             // 
@@ -993,6 +1064,11 @@
         private System.Windows.Forms.Label LblVia;
         private System.Windows.Forms.TextBox TxtNom;
         private System.Windows.Forms.Label LblNom;
+        private System.Windows.Forms.Label LblCup;
+        private System.Windows.Forms.TextBox TxtCupo;
+        private System.Windows.Forms.Label LblVeh;
+        private System.Windows.Forms.TextBox TxtVehiculo;
+        private FontAwesome.Sharp.IconButton BtnMod;
         private FontAwesome.Sharp.IconButton BtnBaja;
         private FontAwesome.Sharp.IconButton BtnAlta;
         private FontAwesome.Sharp.IconButton BtnSave;
